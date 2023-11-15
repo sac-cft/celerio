@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Registartion Brezza</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      #userForm {
+        background-color: transparent;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        padding: 50px;
+        margin-bottom: 150px;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      input {
+        width: 70%;
+        padding: 16px;
+        margin-bottom: 20px;
+        border: 2px solid #000;
+        border-radius: 3px;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bolder;
+      }
+
+      input::placeholder {
+        font-weight: bolder;
+        font-size: larger;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        position: relative;
+      }
+      /* Add some additional styles for a more polished look */
+      input:focus {
+        outline: none;
+      }
+
+      #userCard {
+        display: none;
+      }
+      h2 {
+        font-size: 72px;
+        background: -webkit-linear-gradient(#eee, #333);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      #bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -300;
+      }
+
+      #submit {
+        width: 100px;
+      }
+
+      #registration {
+        width: 350px;
+        margin-bottom: 10px;
+      }
+
+      #tq{
+        width: 70%;
+        margin-bottom: 150px;
+      }
+      #tq > img{
+        width:100% ;
+      }
+      #code{
+        position: absolute;
+        left: 40%;
+        font-weight: bolder;
+        font-size: 90px;
+        color: aliceblue;
+        bottom: 100px;
+      }
+      /* Spinner animation */
+      .spinner {
+        border: 8px solid rgba(0, 0, 0);
+        border-top: 8px solid #007bff;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        position: absolute;
+        display: none;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <img id="bg" src="../asset/registrtion/bg.png" alt="" />
+    <div class="spinner"></div>
+    <div id="userForm" >
+      <img
+        id="registration"
+        src="../asset/registrtion/registration.png"
+        alt=""
+      />
+      <form>
+        <input type="text" id="name" name="name" required placeholder="name" />
+        <input
+          type="text"
+          id="email"
+          name="email"
+          required
+          placeholder="E-mail"
+        />
+        <input
+          type="text"
+          id="phone"
+          name="phone"
+          required
+          placeholder="contact"
+        />
+        <br />
+        <img
+          id="submit"
+          onclick="sendData()"
+          src="../asset/registrtion/submit.png"
+          alt=""
+        />
+      </form>
+    </div>
+
+    <div id="tq" style="display: none;">
+      <img
+          onclick="sendData()"
+          src="../asset/registrtion/tq.png"
+          alt=""
+        />
+        <h1 id="code">8888</h1>
+    </div>
+
+    <script>
+      const socket = io.connect();
+      const intervalTime = 8000;
+      const form = document.querySelector("form");
+      const spinner = document.querySelector(".spinner");
+
+      const sendData = () => {
+        spinner.style.display = "block"; // Show the spinner
+        document.getElementById("userForm").style.display = "none"; // Show the spinner
+        const name = document.getElementById("name").value;
+        const contact = document.getElementById("phone").value;
+        const email = document.getElementById("email").value;
+        socket.emit("saveUser", { name, contact, email });
+      };
+
+      socket.on("userSaved", (e) => {
+        spinner.style.display = "none";
+        document.getElementById("tq").style.display = "block";
+        document.getElementById("code").innerText = e;
+        setInterval(() => {
+          location.reload();
+          clearInterval();
+        }, intervalTime);
+      });
+    </script>
+  </body>
+</html>

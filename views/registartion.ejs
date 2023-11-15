@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Web App</title>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        padding: 0;
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #first {
+        width:  100vw;
+        height:  100vh;
+        position: relative;
+        
+      }
+      
+      #bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -300;
+      }
+      #main{
+        width:  100vw;
+        height:  100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #old {
+        width: 500px;
+        height: 300px;
+        background-color: transparent;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        cursor: pointer;
+      }
+      #new{
+        width: 310px;
+        height: 300px;
+        background-color: transparent;
+        position: absolute;
+        bottom: 10%;
+        cursor: pointer;
+      }
+
+      #userForm{
+        margin-bottom: 30px;
+      }
+      
+      input {
+        width: 70%;
+        padding: 16px;
+        margin-bottom: 20px;
+        border: 2px solid #000;
+        border-radius: 3px;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bolder;
+      }
+
+      input::placeholder {
+        font-weight: bolder;
+        font-size: larger;
+      }
+
+      button {
+        width: 30%;
+        top: 30%;
+        right: 0;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        position: absolute;
+      }
+      /* Add some additional styles for a more polished look */
+      input:focus {
+        outline: none;
+      }
+
+      #registration {
+        width: 350px;
+        margin-bottom: 10px;
+      }
+
+      #code{
+        position: absolute;
+        bottom: 23%;
+        left: 40%;
+        font-size: 50px;
+        font-weight: bolder;
+        
+      }
+      .code-input-container {
+        background-size: contain; /* Adjust as necessary */
+        padding: 20px;
+        height: 40vh;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px; /* Adjust based on your image size */
+      }
+      .code-input {
+        font-size: 24px;
+        width: 50px; /* Adjust the width as necessary */
+        height: 30px;
+        padding: 15px;
+        border: 2px solid #000;
+        text-align: center;
+        margin: 0 5px;
+      }
+      #qrCode{
+        position: absolute;
+        right:  19%;
+        bottom:  16%;
+      }
+
+      #showQr{
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+      #qrBg{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -300;
+      }
+      /* Spinner animation */
+      .spinner {
+        border: 8px solid rgba(0, 0, 0);
+        border-top: 8px solid #007bff;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        position: absolute;
+        display: none;
+      }
+
+
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="spinner"></div>
+    
+      <div id="main">
+        <img
+        id="first"
+        src="../assets/bg.jpg"
+        alt=""
+      />
+       <div id="new" type="button" onclick="goToForm()">
+
+       </div>
+       <div id="old" type="button" onclick="goToCode()">
+
+       </div>
+
+      </div>
+     
+      <div id="userForm"style="display: none;" >
+        <img id="bg" src="../assets/registration.png" alt="" />
+        <img
+          id="registration"
+          src="../assets/reg.png"
+          alt=""
+        />
+        <form>
+          <input type="text" id="name" name="name" required placeholder="name" />
+          <input
+            type="text"
+            id="email"
+            name="email"
+            required
+            placeholder="E-mail"
+          />
+          <input
+            type="text"
+            id="phone"
+            name="phone"
+            required
+            placeholder="contact"
+          />
+          <br />
+          <img
+            id="submit"
+            onclick="sendData()"
+            src="../assets/submit.png"
+            alt=""
+          />
+        </form>
+      </div>
+
+      <div id="tq" style="display: none;">
+        <img
+            src="../assets/registration.png"
+            alt=""
+          />
+          <h1 id="code">8888</h1>
+      </div>
+
+      <div class="code-input-container" id="container" style="display: none;">
+        <img id="bg" src="../assets/registration.png" alt="" />
+        <input type="text" class="code-input" id="codeInput1" maxlength="1" />
+        <input type="text" class="code-input" id="codeInput2" maxlength="1" />
+        <input type="text" class="code-input" id="codeInput3" maxlength="1" />
+        <input type="text" class="code-input" id="codeInput4" maxlength="1" />
+      </div>
+  
+      <div id="showQr"  style="display: none;">
+        <img id="qrBg" src="../assets/qrbg.png" alt="" />
+        <button id="startButton"  onclick="stratCapture()">START CAPTURE</button>
+      <div   id="qrCode"></div>
+      </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script>
+      const socket = io();
+      const intervalTime = 8000;
+      const form = document.querySelector("form");
+      const spinner = document.querySelector(".spinner");
+
+      function goToCode() {
+        document.getElementById("main").style.display = 'none'
+        document.getElementById("container").style.display = 'block'
+        // alert('emit for photo')
+        // socket.emit('startCapture')
+      }
+
+     
+
+      function goToForm() {
+        document.getElementById("main").style.display = 'none'
+        document.getElementById("userForm").style.display = 'block'
+      }
+
+      const sendData = () => {
+        document.getElementById("userForm").style.display = "none"; // Show the spinner
+        const name = document.getElementById("name").value;
+        const contact = document.getElementById("phone").value;
+        const email = document.getElementById("email").value;
+        socket.emit("saveUser", { name, contact, email });
+      };
+
+      socket.on("userSaved", (e) => {
+        document.getElementById("tq").style.display = "block";
+        document.getElementById("code").innerText = e;
+        setTimeout(() => {
+          clearTimeout();
+          location.reload();
+        }, intervalTime);
+      });
+
+      function moveToNextInput(e) {
+        let target = e.srcElement || e.target;
+        let maxLength = parseInt(target.attributes["maxlength"].value, 10);
+        let myLength = target.value.length;
+        if (myLength >= maxLength) {
+          let next = target;
+          while ((next = next.nextElementSibling)) {
+            if (next == null) break;
+            if (next.tagName.toLowerCase() === "input") {
+              next.focus();
+              break;
+            }
+          }
+        }
+        // If last input is filled, call a function to handle the full code
+        if (target.id === "codeInput4" && myLength >= maxLength) {
+          submitCode();
+        }
+      }
+
+      function submitCode() {
+        let code = "";
+        for (let i = 1; i <= 4; i++) {
+          code += document.getElementById("codeInput" + i).value;
+        }
+        // alert(`Code entered: ${code}`);
+        socket.emit("getCode", { code });
+      }
+      
+       // Add event listeners to the code input fields
+       document.querySelectorAll('.code-input').forEach(input => {
+        input.addEventListener('input', moveToNextInput);
+      });
+
+      socket.on("userFound",  () => {
+        document.getElementById("container").style.display = 'none'
+        document.getElementById("startButton").style.display = 'block'
+        document.getElementById("showQr").style.display = 'block'
+      })
+
+      socket.on("userNotFound", () => {
+        alert("Please register.")
+        location.reload()
+      })
+
+      function generateQRCode(value) {
+        const qrcode = new QRCode(document.getElementById("qrCode"), {
+          text: value,
+          width: 170,
+          height: 170,
+        });
+      }
+
+      function stratCapture() {
+        socket.emit('startCapture')
+      }
+      socket.on("getUlr", (e) => {
+        // alert('gott')
+        document.getElementById("startButton").style.display = 'none'
+        document.getElementById("qrCode").style.display = 'block'
+        generateQRCode(e);
+        console.log(e);
+      })
+    </script>
+  </body>
+</html>
