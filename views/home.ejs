@@ -47,9 +47,7 @@
         document.getElementById("uploadButton").addEventListener("click", uploadFrame);
 
             socket.on("capture" ,() =>{
-                // alert('capture')
                 uploadFrame()
-                // document.getElementById("uploadButton").addEventListener("click", uploadFrame);
             })
         function uploadFrame() {
             if (videoStream) {
@@ -74,7 +72,6 @@
                     .then((downloadURL) => {
                         console.log("Frame available at", downloadURL);
                         socket.emit("sendUrl",downloadURL)
-                        // Now you can use the downloadURL as needed, e.g., save it to a database.
                     })
                     .catch((error) => console.error("Error uploading frame", error));
             } else {
