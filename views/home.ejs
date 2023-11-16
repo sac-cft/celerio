@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        html,body{
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      html,
+      body {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <video id="cameraStream" width="1920" height="1080" autoplay></video>
 
     <!-- Use version 8 of Firebase scripts -->
@@ -24,69 +25,79 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-          const socket = io();
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZnFJQJlCQEFdvmFLI0gkSCHHiH1lUAWo",
-            authDomain: "node-file-uploader.firebaseapp.com",
-            databaseURL: "https://node-file-uploader-default-rtdb.firebaseio.com",
-            projectId: "node-file-uploader",
-            storageBucket: "node-file-uploader.appspot.com",
-            messagingSenderId: "345185058962",
-            appId: "1:345185058962:web:8629baa36820a3c410a64b",
-            measurementId: "G-GSV81VWQE1",
-        };
+      const socket = io();
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyBZnFJQJlCQEFdvmFLI0gkSCHHiH1lUAWo",
+        authDomain: "node-file-uploader.firebaseapp.com",
+        databaseURL: "https://node-file-uploader-default-rtdb.firebaseio.com",
+        projectId: "node-file-uploader",
+        storageBucket: "node-file-uploader.appspot.com",
+        messagingSenderId: "345185058962",
+        appId: "1:345185058962:web:8629baa36820a3c410a64b",
+        measurementId: "G-GSV81VWQE1",
+      };
 
-        firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
+      firebase.initializeApp(firebaseConfig);
+      const storage = firebase.storage();
 
-        let videoStream;
+      let videoStream;
 
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then((stream) => {
-                videoStream = stream;
-                const cameraStream = document.getElementById('cameraStream');
-                if ('srcObject' in cameraStream) {
-                    cameraStream.srcObject = stream;
-                } else {
-                    cameraStream.src = URL.createObjectURL(stream);
-                }
+      navigator.mediaDevices
+        .getUserMedia({
+          video: {
+            facingMode: { exact: "environment" }, // Use 'environment' for back camera
+          },
+        })
+        .then((stream) => {
+          videoStream = stream;
+          const cameraStream = document.getElementById("cameraStream");
+          if ("srcObject" in cameraStream) {
+            cameraStream.srcObject = stream;
+          } else {
+            cameraStream.src = URL.createObjectURL(stream);
+          }
+        })
+        .catch((error) => console.error("Error accessing camera:", error));
+
+      socket.on("capture", () => {
+        uploadFrame();
+      });
+      function uploadFrame() {
+        if (videoStream) {
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          canvas.width = 640;
+          canvas.height = 480;
+
+          context.drawImage(
+            document.getElementById("cameraStream"),
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          const base64Image = canvas.toDataURL("image/jpeg");
+
+          console.log("Base64 Image:", base64Image);
+
+          const storageRef = storage.ref();
+          const imageName = `${Date.now()}.jpg`;
+          const imageRef = storageRef.child(`Comicon/${imageName}`);
+
+          imageRef
+            .putString(base64Image, "data_url") // 'data_url' specifies that we're uploading base64 data
+            .then((snapshot) => snapshot.ref.getDownloadURL())
+            .then((downloadURL) => {
+              console.log("Frame available at", downloadURL);
+              socket.emit("sendUrl", downloadURL);
             })
-            .catch((error) => console.error("Error accessing camera:", error));
-
-
-            socket.on("capture" ,() =>{
-                uploadFrame()
-            })
-        function uploadFrame() {
-            if (videoStream) {
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = 640;
-                canvas.height = 480;
-
-                context.drawImage(document.getElementById('cameraStream'), 0, 0, canvas.width, canvas.height);
-
-                const base64Image = canvas.toDataURL('image/jpeg');
-
-                console.log("Base64 Image:", base64Image);
-
-                const storageRef = storage.ref();
-                const imageName = `${Date.now()}.jpg`;
-                const imageRef = storageRef.child(`Comicon/${imageName}`);
-
-                imageRef
-                    .putString(base64Image, 'data_url') // 'data_url' specifies that we're uploading base64 data
-                    .then((snapshot) => snapshot.ref.getDownloadURL())
-                    .then((downloadURL) => {
-                        console.log("Frame available at", downloadURL);
-                        socket.emit("sendUrl",downloadURL)
-                    })
-                    .catch((error) => console.error("Error uploading frame", error));
-            } else {
-                console.error("Camera stream not available");
-            }
+            .catch((error) => console.error("Error uploading frame", error));
+        } else {
+          console.error("Camera stream not available");
         }
+      }
     </script>
-</body>
+  </body>
 </html>
