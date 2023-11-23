@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <button onclick="downloadAndSaveImages()">Download and Save Images</button>
+
+    <!-- Use version 8 of Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyBZnFJQJlCQEFdvmFLI0gkSCHHiH1lUAWo",
+        authDomain: "node-file-uploader.firebaseapp.com",
+        databaseURL: "https://node-file-uploader-default-rtdb.firebaseio.com",
+        projectId: "node-file-uploader",
+        storageBucket: "node-file-uploader.appspot.com",
+        messagingSenderId: "345185058962",
+        appId: "1:345185058962:web:8629baa36820a3c410a64b",
+        measurementId: "G-GSV81VWQE1",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const storage = firebase.storage();
+
+      function downloadAndSaveImages() {
+        const storageRef = storage.ref();
+        const imagesRef = storageRef.child('Comicon');
+
+        imagesRef.listAll().then(function (res) {
+          res.items.forEach(function (itemRef) {
+            itemRef.getDownloadURL().then(function (downloadURL) {
+              console.log('Image URL:', downloadURL);
+              socket.emit("downloadAndSave", downloadURL);
+            });
+          });
+        }).catch(function (error) {
+          console.error('Error listing images', error);
+        });
+      }
+    </script>
+  </body>
+</html>
